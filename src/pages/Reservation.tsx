@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useSiteData } from '../hooks/useSiteData';
-import { Crown, Send, Calendar, User, Mail, MessageSquare } from 'lucide-react';
+import { Crown, Send, Calendar, User, Mail, MessageSquare, Bed, Users, Clock } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 export default function Reservation() {
@@ -12,8 +12,18 @@ export default function Reservation() {
     email: '',
     type: 'Chambre',
     date: '',
-    message: ''
+    message: '',
+    roomType: '',
+    roomCount: 1,
+    duration: 1,
+    restaurantSeats: 2,
   });
+
+  useEffect(() => {
+    if (data.rooms && data.rooms.length > 0 && !formData.roomType) {
+      setFormData(prev => ({ ...prev, roomType: data.rooms[0].name }));
+    }
+  }, [data.rooms]);
 
   useEffect(() => {
     if (location.state) {
@@ -31,7 +41,15 @@ export default function Reservation() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const text = `👑 *Nouvelle demande de réservation*\n\n*Nom:* ${formData.name}\n*Email:* ${formData.email}\n*Type:* ${formData.type}\n*Date souhaitée:* ${formData.date}\n\n*Message:*\n${formData.message}`;
+    
+    let details = '';
+    if (formData.type === 'Chambre') {
+      details = `*Type de chambre:* ${formData.roomType}\n*Nombre de chambres:* ${formData.roomCount}\n*Durée du séjour:* ${formData.duration} jour(s)\n`;
+    } else if (formData.type === 'Restaurant') {
+      details = `*Nombre de places:* ${formData.restaurantSeats} personne(s)\n`;
+    }
+
+    const text = `👑 *Nouvelle demande de réservation*\n\n*Nom:* ${formData.name}\n*Email:* ${formData.email}\n*Type:* ${formData.type}\n*Date:* ${formData.date}\n${details}\n*Message:*\n${formData.message}`;
     const encodedText = encodeURIComponent(text);
     window.open(`https://wa.me/${data.settings.whatsappNumber}?text=${encodedText}`, '_blank');
   };
@@ -141,7 +159,7 @@ export default function Reservation() {
 
               <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
                 <label htmlFor="date" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-royal-gold" /> Date Souhaitée
+                  <Calendar className="h-4 w-4 mr-2 text-royal-gold" /> {formData.type === 'Chambre' ? "Date d'arrivée" : "Date Souhaitée"}
                 </label>
                 <input
                   type="date"
@@ -154,6 +172,86 @@ export default function Reservation() {
                 />
               </motion.div>
             </div>
+
+            {/* Conditional Fields based on Reservation Type */}
+            {formData.type === 'Chambre' && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              >
+                <div>
+                  <label htmlFor="roomType" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
+                    <Bed className="h-4 w-4 mr-2 text-royal-gold" /> Type de chambre
+                  </label>
+                  <select
+                    id="roomType"
+                    name="roomType"
+                    value={formData.roomType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-royal-green/20 rounded-sm focus:outline-none focus:ring-2 focus:ring-royal-gold focus:border-transparent transition-shadow bg-royal-silk/50"
+                  >
+                    {data.rooms.map((room, idx) => (
+                      <option key={idx} value={room.name}>{room.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="roomCount" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
+                    <Crown className="h-4 w-4 mr-2 text-royal-gold" /> Nombre
+                  </label>
+                  <input
+                    type="number"
+                    id="roomCount"
+                    name="roomCount"
+                    min="1"
+                    required
+                    value={formData.roomCount}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-royal-green/20 rounded-sm focus:outline-none focus:ring-2 focus:ring-royal-gold focus:border-transparent transition-shadow bg-royal-silk/50"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="duration" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
+                    <Clock className="h-4 w-4 mr-2 text-royal-gold" /> Jours
+                  </label>
+                  <input
+                    type="number"
+                    id="duration"
+                    name="duration"
+                    min="1"
+                    required
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-royal-green/20 rounded-sm focus:outline-none focus:ring-2 focus:ring-royal-gold focus:border-transparent transition-shadow bg-royal-silk/50"
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {formData.type === 'Restaurant' && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-8"
+              >
+                <div>
+                  <label htmlFor="restaurantSeats" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
+                    <Users className="h-4 w-4 mr-2 text-royal-gold" /> Nombre de places
+                  </label>
+                  <input
+                    type="number"
+                    id="restaurantSeats"
+                    name="restaurantSeats"
+                    min="1"
+                    required
+                    value={formData.restaurantSeats}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-royal-green/20 rounded-sm focus:outline-none focus:ring-2 focus:ring-royal-gold focus:border-transparent transition-shadow bg-royal-silk/50"
+                  />
+                </div>
+              </motion.div>
+            )}
             
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
               <label htmlFor="message" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
@@ -162,12 +260,11 @@ export default function Reservation() {
               <textarea
                 id="message"
                 name="message"
-                required
-                rows={5}
+                rows={4}
                 value={formData.message}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-royal-green/20 rounded-sm focus:outline-none focus:ring-2 focus:ring-royal-gold focus:border-transparent transition-shadow bg-royal-silk/50 resize-none"
-                placeholder="Nombre de personnes, demandes spéciales..."
+                placeholder="Demandes spéciales, allergies..."
               ></textarea>
             </motion.div>
             
