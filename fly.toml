@@ -1,0 +1,19 @@
+app = "le-trone-du-nlonako"
+primary_region = "cdg"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  DATA_DIR = "/data"
+
+[mounts]
+  source = "cms_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: le-trone-du-nlonako
+    env: docker
+    plan: free
+    envVars:
+      - key: DATA_DIR
+        value: /data
+    disk:
+      name: cms-data
+      mountPath: /data
+      sizeGB: 1
