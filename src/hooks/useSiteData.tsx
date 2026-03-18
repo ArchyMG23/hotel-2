@@ -1,8 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SiteData, defaultSiteData } from '../data/siteData';
-import localforage from 'localforage';
-
-const STORAGE_KEY = 'nlonako_site_data_v2';
 
 interface SiteDataContextType {
   data: SiteData;
@@ -17,27 +14,40 @@ export function SiteDataProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    localforage.getItem<string>(STORAGE_KEY).then((stored) => {
-      if (stored) {
-        try {
-          setData({ ...defaultSiteData, ...JSON.parse(stored) });
-        } catch (e) {
-          console.error("Failed to parse stored site data", e);
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(stored => {
+        if (stored && Object.keys(stored).length > 0) {
+          setData({ ...defaultSiteData, ...stored });
+        } else {
+          // Initialize server with default data if empty
+          fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(defaultSiteData)
+          }).catch(err => console.error("Failed to initialize server data", err));
         }
-      }
-      setIsLoading(false);
-    }).catch((err) => {
-      console.error("Error loading data from localforage", err);
-      setIsLoading(false);
-    });
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading data from server", err);
+        setIsLoading(false);
+      });
   }, []);
 
   const updateData = (newData: Partial<SiteData> | ((prev: SiteData) => SiteData)) => {
     setData(prev => {
       const updated = typeof newData === 'function' ? newData(prev) : { ...prev, ...newData };
-      localforage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(err => {
-        console.error("Failed to save site data", err);
+      
+      // Save to server
+      fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      }).catch(err => {
+        console.error("Failed to save site data to server", err);
       });
+      
       return updated;
     });
   };
