@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "SiteData": {
+      "title": "SiteData",
+      "description": "The main configuration and content for the hotel website.",
+      "type": "object",
+      "properties": {
+        "settings": {
+          "type": "object",
+          "properties": {
+            "whatsappNumber": { "type": "string" },
+            "email": { "type": "string" },
+            "secretCode": { "type": "string" },
+            "address": { "type": "string" },
+            "mapUrl": { "type": "string" }
+          }
+        },
+        "home": {
+          "type": "object",
+          "properties": {
+            "heroVideoUrl": { "type": "string" },
+            "heroImageUrl": { "type": "string" },
+            "heroTitle": { "type": "string" },
+            "heroSubtitle": { "type": "string" },
+            "welcomeTitle": { "type": "string" },
+            "welcomeText": { "type": "string" },
+            "welcomeDescription": { "type": "string" }
+          }
+        },
+        "rooms": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "restaurant": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "menu": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "events": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "images": { "type": "array", "items": { "type": "string" } },
+            "bookedDates": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "blog": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "about": {
+          "type": "object",
+          "properties": {
+            "founderName": { "type": "string" },
+            "founderBio": { "type": "string" },
+            "founderImage": { "type": "string" },
+            "directorName": { "type": "string" },
+            "directorBio": { "type": "string" },
+            "directorImage": { "type": "string" },
+            "hotelDescription": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/site_data/{docId}": {
+      "schema": "SiteData",
+      "description": "Singleton document containing all site data"
+    }
+  }
+}

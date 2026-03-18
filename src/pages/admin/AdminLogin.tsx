@@ -2,23 +2,27 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Crown, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useSiteData } from '../../hooks/useSiteData';
+import { auth } from '../../firebase';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export default function AdminLogin() {
-  const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { data } = useSiteData();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (code === data.settings.secretCode) {
-      // Store auth state in sessionStorage
-      sessionStorage.setItem('admin_auth', 'true');
-      navigate('/admin/dashboard');
-    } else {
-      setError('Code secret incorrect.');
-      setCode('');
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      if (result.user.email === 'yombivictor@gmail.com') {
+        sessionStorage.setItem('admin_auth', 'true');
+        navigate('/admin/dashboard');
+      } else {
+        setError("Accès refusé. Vous n'êtes pas l'administrateur.");
+        auth.signOut();
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError("Erreur lors de la connexion avec Google.");
     }
   };
 
@@ -39,26 +43,7 @@ export default function AdminLogin() {
           <p className="text-royal-green/60 text-sm tracking-[0.2em] uppercase mt-2">Module d'Administration</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-royal-green/80 mb-2 flex items-center">
-              <Lock className="h-4 w-4 mr-2 text-royal-gold" />
-              Code Secret
-            </label>
-            <input
-              type="password"
-              id="code"
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-3 border-2 border-royal-green/20 rounded-sm focus:outline-none focus:ring-0 focus:border-royal-gold transition-colors text-center tracking-[0.5em] font-mono text-xl"
-              placeholder="••••••••"
-              autoFocus
-            />
-          </div>
-
+        <div className="space-y-6">
           {error && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -70,12 +55,13 @@ export default function AdminLogin() {
           )}
 
           <button
-            type="submit"
-            className="w-full bg-royal-gold text-royal-green px-8 py-4 font-cinzel font-bold tracking-widest hover:bg-royal-green hover:text-royal-gold transition-colors shadow-lg"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center bg-white text-gray-700 px-8 py-4 font-bold hover:bg-gray-50 transition-colors shadow-lg border border-gray-200"
           >
-            ACCÉDER AU TRÔNE
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6 mr-3" />
+            CONNEXION AVEC GOOGLE
           </button>
-        </form>
+        </div>
 
         <div className="mt-8 text-center">
           <button

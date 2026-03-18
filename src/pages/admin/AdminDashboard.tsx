@@ -5,6 +5,7 @@ import { Crown, LogOut, Settings, Home, Bed, Utensils, Calendar, FileText, Info,
 import { format, parseISO, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ImageUpload from '../../components/admin/ImageUpload';
+import { auth } from '../../firebase';
 
 type Tab = 'settings' | 'home' | 'rooms' | 'restaurant' | 'events' | 'blog' | 'about';
 
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     sessionStorage.removeItem('admin_auth');
+    auth.signOut();
     navigate('/');
   };
 

@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: site_data
+    // Document ID: main
+    // Fields:
+    //   - settings: map
+    //   - home: map
+    //   - rooms: list
+    //   - restaurant: map
+    //   - events: map
+    //   - blog: list
+    //   - about: map
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == "yombivictor@gmail.com" && request.auth.token.email_verified == true;
+    }
+
+    match /site_data/{docId} {
+      // Public read access so visitors can see the website content
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -11,6 +11,7 @@ import Reservation from './pages/Reservation';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { SiteDataProvider, useSiteData } from './hooks/useSiteData';
+import { ReactLenis } from 'lenis/react';
 
 function AppContent() {
   const { isLoading } = useSiteData();
@@ -45,8 +46,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SiteDataProvider>
-      <AppContent />
-    </SiteDataProvider>
+    <ReactLenis root options={{ lerp: 0.05, wheelMultiplier: 0.8, smoothWheel: true }}>
+      <SiteDataProvider>
+        <AppContent />
+      </SiteDataProvider>
+    </ReactLenis>
   );
 }
